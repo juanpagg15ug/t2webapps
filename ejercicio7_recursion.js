@@ -1,12 +1,135 @@
-let sistemaArchivos;
+const sistemaArchivos = {
+    nombre: "ProyectoEmpresa",
+    archivos: [],
+    subcarpetas: {
+        Documentacion: {
+            nombre: "Documentacion",
+            archivos: [],
+            subcarpetas: {
+                Manuales: {
+                    nombre: "Manuales",
+                    archivos: [],
+                    subcarpetas: {
+                        Usuario: {
+                            nombre: "Usuario",
+                            archivos: [
+                                "guia_instalacion.pdf",
+                                "manual_funcional.docx",
+                                "preguntas_frecuentes.txt"
+                            ],
+                            subcarpetas: {}
+                        },
+                        Tecnico: {
+                            nombre: "Tecnico",
+                            archivos: [
+                                "arquitectura_sistema.drawio",
+                                "configuracion_servidor.md",
+                                "mantenimiento_periodico.xlsx"
+                            ],
+                            subcarpetas: {}
+                        }
+                    }
+                },
+                Politicas: {
+                    nombre: "Politicas",
+                    archivos: [
+                        "seguridad_datos.pdf",
+                        "confidencialidad.docx",
+                        "uso_recursos_informaticos.txt"
+                    ],
+                    subcarpetas: {}
+                }
+            }
+        },
+        Desarrollo: {
+            nombre: "Desarrollo",
+            archivos: ["README.md", "package.json"],
+            subcarpetas: {
+                Frontend: {
+                    nombre: "Frontend",
+                    archivos: ["index.html", "main.js", "styles.css"],
+                    subcarpetas: {
+                        Componentes: {
+                            nombre: "Componentes",
+                            archivos: ["Header.jsx", "Footer.jsx", "Navbar.jsx"],
+                            subcarpetas: {}
+                        },
+                        Utils: {
+                            nombre: "Utils",
+                            archivos: ["helpers.js", "validators.js"],
+                            subcarpetas: {}
+                        }
+                    }
+                },
+                Backend: {
+                    nombre: "Backend",
+                    archivos: ["server.js", "app.js"],
+                    subcarpetas: {
+                        Controllers: {
+                            nombre: "Controllers",
+                            archivos: ["userController.js", "productController.js"],
+                            subcarpetas: {}
+                        },
+                        Models: {
+                            nombre: "Models",
+                            archivos: ["User.js", "Product.js", "Order.js"],
+                            subcarpetas: {}
+                        },
+                        Routes: {
+                            nombre: "Routes",
+                            archivos: ["api.js", "auth.js"],
+                            subcarpetas: {}
+                        }
+                    }
+                }
+            }
+        },
+        Bases_Datos: {
+            nombre: "Bases_Datos",
+            archivos: ["esquema_principal.sql"],
+            subcarpetas: {
+                Migraciones: {
+                    nombre: "Migraciones",
+                    archivos: ["001_crear_tablas.sql", "002_indices.sql", "003_constraints.sql"],
+                    subcarpetas: {}
+                },
+                Respaldos: {
+                    nombre: "Respaldos",
+                    archivos: ["backup_2024_01.sql", "backup_2024_02.sql"],
+                    subcarpetas: {}
+                }
+            }
+        }
+    }
+};
 
-try {
-    const rutaJSON = path.join(__dirname, 'sistemaArchivos.json');
-    const datosJSON = fs.readFileSync(rutaJSON, 'utf8');
-    sistemaArchivos = JSON.parse(datosJSON);
-    console.log("\n✅ Sistema de archivos cargado correctamente desde JSON externo");
-} catch (error) {
-    console.error("\n❌ Error al cargar el sistema de archivos:", error.message);
-    console.log("\n💡 Asegúrate de tener el archivo 'sistemaArchivos.json' en el mismo directorio");
-    process.exit(1);
+function buscarArchivo(carpeta, nombreArchivo, rutaActual = "") {
+    // Construir la ruta actual
+    const rutaNueva = rutaActual ? `${rutaActual}/${carpeta.nombre}` : carpeta.nombre;
+    
+    // CASO BASE: Buscar en los archivos de la carpeta actual
+    if (carpeta.archivos && carpeta.archivos.includes(nombreArchivo)) {
+        const rutaCompleta = `${rutaNueva}/${nombreArchivo}`;
+        return {
+            found: true,
+            path: rutaCompleta
+        };
+    } 
+     if (carpeta.subcarpetas) {
+        // Iterar sobre cada subcarpeta
+        for (const nombreSubcarpeta in carpeta.subcarpetas) {
+            const subcarpeta = carpeta.subcarpetas[nombreSubcarpeta];
+            
+            // Llamada recursiva: buscar en la subcarpeta
+            const resultado = buscarArchivo(subcarpeta, nombreArchivo, rutaNueva);
+            
+            // Si se encontró en esta subcarpeta, retornar inmediatamente
+            if (resultado && resultado.found) {
+                return resultado;
+            }
+        }
+    }
+    
+    // Si no se encontró en esta rama, retornar null
+    return null;
 }
